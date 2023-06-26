@@ -9,20 +9,19 @@ function main_solo(object_name, CAD_idx, start_idx, stop_idx)
     % load libraries
     variable_library_scene;
     variable_library_radar;
-    variable_library_camera;
+    
     
     %% logging
-    atnaInfo=strcat("Size of antenna array: ",num2str(N_RX_az),"x",num2str(N_RX_el)); disp(atnaInfo);
-    vibrInfo=strcat("Vibration mode: Radar->",vibration_mode_radar,", Camera->",vibration_mode_cam); disp(vibrInfo);
-    logFile = strcat("..",SLASH,"results",SLASH,object_name,"_",num2str(CAD_idx),SLASH,"log.txt");
-    logging(logFile, object_name, CAD_idx, N_RX_az, N_RX_el, atn_bdl,...
-    vibration_mode_radar, vibr_azi_stdev, vibr_rho_stdev, vibr_elv_stdev,...
-    vibration_mode_cam, vibr_x_stdev, vibr_y_stdev, vibr_z_stdev,...
-    N_sample, N_phi, N_theta, N_y_heat, N_x_heat, N_z_heat, N_pixel_col, N_pixel_row,...
-    azi_FOV, phi_res_deg, elv_FOV, theta_res_deg, rho_max, rho_res,...
-    cam_hfov_deg, cam_vfov_deg, cam_res_deg, cam_range_min, cam_range_max,...
-    sensor_x, sensor_y, height_offset, top_offset, sensor_ang_deg, translate_lim,...
-    heatmap_ceiling, threshold_factor);
+    
+    % atnaInfo=strcat("Size of antenna array: ",num2str(N_RX_az),"x",num2str(N_RX_el)); disp(atnaInfo);
+    % vibrInfo=strcat("Vibration mode: Radar->",vibration_mode_radar); disp(vibrInfo);
+    % logFile = strcat("..",SLASH,"results",SLASH,object_name,"_",num2str(CAD_idx),SLASH,"log.txt");
+    % logging(logFile, object_name, CAD_idx, N_RX_az, N_RX_el, atn_bdl,...
+    % vibration_mode_radar, vibr_azi_stdev, vibr_rho_stdev, vibr_elv_stdev,...
+    % N_sample, N_phi, N_theta, N_y_heat, N_x_heat, N_z_heat,...
+    % azi_FOV, phi_res_deg, elv_FOV, theta_res_deg, rho_max, rho_res,...
+    % sensor_x, sensor_y, height_offset, top_offset, sensor_ang_deg, translate_lim,...
+    % heatmap_ceiling, threshold_factor);
     %type(logFile);
     
     %%  
@@ -127,20 +126,20 @@ function main_solo(object_name, CAD_idx, start_idx, stop_idx)
             disp(" ");disp(string(datetime('now','TimeZone','local','Format','yyyy-MM-dd HH:mm:ss z')));
             disp(strcat(object_name, " ", num2str(CAD_idx),", placement ", num2str(ks),", view ", num2str(view_idx)));
             
-            %% Modle camera point reflectors in the scene
-            disp("Generating depth image")
-            [visible_cart_v_dep] = remove_occlusion_v1(car_scene_v,"cam",0); % remove occluded body of the car for dep image
-            %save(strcat(rftaddr,'md_',num2str(CAD_idxs),'_pm_',num2str(ks),"_cam_",num2str(cam),'_CameraReflector','.mat'), 'visible_cart_v_dep');
+            % %% Modle camera point reflectors in the scene
+            % disp("Generating depth image")
+            % [visible_cart_v_dep] = remove_occlusion_v1(car_scene_v,"cam",0); % remove occluded body of the car for dep image
+            % %save(strcat(rftaddr,'md_',num2str(CAD_idxs),'_pm_',num2str(ks),"_cam_",num2str(cam),'_CameraReflector','.mat'), 'visible_cart_v_dep');
 
-            % vibration errors
-            depPtCloud = visible_cart_v_dep;
-            depPtCloud = depPtCloud + [vibr_x_err, vibr_y_err, vibr_z_err]; 
-    
-            DepthImg = pc2depImg(depPtCloud);       
-            ColorMap = gray;
-            depOrgFolder = strcat(result_addr,SLASH,"fig",SLASH,"1280x720");
-            depthImgName = strcat(depOrgFolder,SLASH,"cam",num2str(view_idx),SLASH,num2str(ks),".png");
-            imwrite(DepthImg, ColorMap, depthImgName); 
+            % % vibration errors
+            % depPtCloud = visible_cart_v_dep;
+            % depPtCloud = depPtCloud + [vibr_x_err, vibr_y_err, vibr_z_err]; 
+            % 
+            % DepthImg = pc2depImg(depPtCloud);       
+            % ColorMap = gray;
+            % depOrgFolder = strcat(result_addr,SLASH,"fig",SLASH,"1280x720");
+            % depthImgName = strcat(depOrgFolder,SLASH,"cam",num2str(view_idx),SLASH,num2str(ks),".png");
+            % imwrite(DepthImg, ColorMap, depthImgName); 
 
             %% Modle radar point reflectors in the scene
             disp("Generating radar signal")
@@ -180,6 +179,16 @@ function main_solo(object_name, CAD_idx, start_idx, stop_idx)
             heatmap_ct = Sph2CartHeat(view_idx,radar_heatmap_sph,threshold_factor);
             saveaddr_heat_ct = strcat(result_addr,SLASH,"cartHeat");
             save(strcat(saveaddr_heat_ct,SLASH,"cam",num2str(view_idx),SLASH,num2str(ks),".mat"),'heatmap_ct');
+            
+            figure;
+            slice(heatmap_ct, [], [], 1:size(heatmap_ct, 3));
+            colormap jet;
+            colorbar;
+            xlabel('X');
+            ylabel('Y');
+            zlabel('Z');
+            title('3D Plot of 256x64x64 Data');
+            
 
             % finish
             %disp(" ")
